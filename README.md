@@ -124,6 +124,7 @@ This resource provides authoritative timing diagrams, signal structures, and tec
 ## Connection and Setup
 
 TODO:
+Create Custom flightController that supports OpenPixelOSD.
 
 
 ### YouTube Video

@@ -100,6 +100,14 @@ void uart1_init(void)
     LL_USART_DisableFIFO(USART1);
     LL_USART_ConfigAsyncMode(USART1);
 
+
+/* TX/RX fysiek omwisselen */
+#ifdef INVERT_UART
+    LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_SWAPPED);
+#else
+    LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
+#endif
+
     LL_USART_Enable(USART1);
 
     /* Polling USART1 initialisation */

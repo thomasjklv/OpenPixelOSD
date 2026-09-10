@@ -37,10 +37,11 @@
 #define MCU_TYPE "---------"
 #endif /* MCU_TYPE */
 
-//#define USE_MSP
+#define USE_MSP
 #define DEBUG_LED_BLINK
 #define PAUSE_ON_FAILED_INIT 1
 
+#define INVERT_UART
 
 
 typedef enum {

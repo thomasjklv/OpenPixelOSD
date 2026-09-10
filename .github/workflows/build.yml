@@ -14,18 +14,10 @@ jobs:
       matrix:
         include:
           - mcu: STM32G431
-            variant_flag: ""
             job_name: STM32G431
-          - mcu: STM32G431
-            variant_flag: "-DBUILD_VARIANT=VTX"
-            job_name: STM32G431_VTX
 
           - mcu: STM32G474
-            variant_flag: ""
             job_name: STM32G474
-          - mcu: STM32G474
-            variant_flag: "-DBUILD_VARIANT=VTX"
-            job_name: STM32G474_VTX
 
     steps:
     - name: Checkout
@@ -45,8 +37,11 @@ jobs:
     - name : Configure & Build
       working-directory: ./build-${{ matrix.job_name }}
       run: |
-        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTARGET_MCU=${{ matrix.mcu }} ${{ matrix.variant_flag }} ..
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTARGET_MCU=${{ matrix.mcu }} ..
         make -j"$(nproc)"
+
+    - name: Check include paths and case
+      run: python3 python/check_includes.py build-${{ matrix.job_name }}/compile_commands.json
 
     - name : Upload HEX
       uses: actions/upload-artifact@v4

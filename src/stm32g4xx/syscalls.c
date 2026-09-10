@@ -29,7 +29,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <time.h>
-#include <usb.h>
+#include "hardware/usb.h"
 
 /* Variables */
 extern int __io_putchar(int ch) __attribute__((weak));

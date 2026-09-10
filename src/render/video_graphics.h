@@ -6,7 +6,7 @@
 #define VIDEO_GRAPHICS_H
 
 #if defined(HIGH_RAM)
-#include <fonts/font_system.h>
+#include "fonts/font_system.h"
 #include <stdint.h>
 #include "main.h"
 

@@ -5,6 +5,8 @@
 #ifndef VIDEO_GEN_H
 #define VIDEO_GEN_H
 
+#include "main.h"
+
 
 EXEC_RAM void video_gen_start(void);
 EXEC_RAM void video_gen_stop(void);

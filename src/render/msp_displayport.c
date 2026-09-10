@@ -9,13 +9,9 @@
 #include "fonts/update_font.h"
 #include "main.h"
 #include "msp.h"
-#include "uart.h"
-#include "usb.h"
+#include "hardware/uart.h"
+#include "hardware/usb.h"
 
-#if defined(BUILD_VARIANT_VTX)
-#include "vtx_msp.h"
-#define MSP_REQUEST_LOOP_INTERVAL 1000
-#endif
 
 typedef enum {
     MSP_DISPLAYPORT_KEEPALIVE,
@@ -58,9 +54,6 @@ EXEC_RAM static void msp_callback(uint8_t owner, msp_version_t msp_version, uint
             {
                 static bool displayport_initialized = false;
                 if (!displayport_initialized) {
-                    #if defined(BUILD_VARIANT_VTX)
-                    vtx_msp_request_config(owner);
-                    #endif
                     displayport_initialized = true;
                     show_logo = false;
                     // Send canvas size to FC
@@ -112,20 +105,6 @@ EXEC_RAM static void msp_callback(uint8_t owner, msp_version_t msp_version, uint
         }
             break;
 
-        case MSP_VTX_CONFIG:
-        case MSP_SET_VTX_CONFIG:
-        case MSP_VTXTABLE_BAND:
-        case MSP_VTXTABLE_POWERLEVEL: {
-#if defined(BUILD_VARIANT_VTX)
-            vtx_msp_handle_msp(owner, msp_cmd, data_size, payload);
-            const vtx_config_t *vtx_config = vtx_get_config();
-            if (!vtx_config->vtx_table_available) {
-                vtx_msp_clear_table_and_set_defaults(owner);
-            }
-#endif
-        }
-            break;
-
         default:
             printf("MSP command not parsed %d:0x%02X\r\n",msp_cmd, msp_cmd);
             break;
@@ -159,12 +138,4 @@ EXEC_RAM void msp_loop_process(void)
         msp_process_received_data(&msp_usb, byte);
     }
 
-#if defined(BUILD_VARIANT_VTX)
-    static uint32_t last_tick = 0;
-    static bool resp = true;
-    if ((HAL_GetTick() - last_tick) >= MSP_REQUEST_LOOP_INTERVAL && resp) {
-        last_tick = HAL_GetTick();
-        vtx_msp_request_config(MSP_OWNER_UART);
-    }
-#endif
 }

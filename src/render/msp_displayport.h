@@ -3,7 +3,7 @@
  * Copyright (C) 2025 Vitaliy N <vitaliy.nimych@gmail.com>
  */
 #ifndef MSP_DISPLAYPORT_H
-#define MSP_DISPLAYPORT_H
+//#define MSP_DISPLAYPORT_H
 #include <stdint.h>
 typedef enum
 {

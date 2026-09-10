@@ -1,219 +1,124 @@
 cmake_minimum_required(VERSION 3.22)
-# ===== Build variant selection =====
-#   OpenPixelOSD      -> base OSD (no VTX drivers)
-#   OpenPixelOSD_VTX  -> OSD + VTX (RTC6705 / PA / MSP VTX)
-set(BUILD_VARIANT "" CACHE STRING "Build variant: VTX")
 
-set(TARGET_MCU "" CACHE STRING "Target MCU (e.g., STM32G431, STM32G474)")
-# set default to G431 if not specified
-if(NOT TARGET_MCU)
-    set(TARGET_MCU STM32G431)
-endif()
-
-message(STATUS "Selected TARGET_MCU=${TARGET_MCU} BUILD_VARIANT=${BUILD_VARIANT}")
-
-if(UNIX AND NOT APPLE)
-    # Linux
-    set(OS_SUPPORTED TRUE)
-elseif(APPLE)
-    # macOS
-    set(OS_SUPPORTED TRUE)
-else()
-    set(OS_SUPPORTED FALSE)
-endif()
-
-if(OS_SUPPORTED)
-    execute_process(
-            COMMAND git rev-parse --abbrev-ref HEAD
-            COMMAND cut -c1-10
-            OUTPUT_VARIABLE GIT_BRANCH
-            RESULT_VARIABLE BRANCH_RESULT
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-    )
-    if(BRANCH_RESULT EQUAL 0)
-        message(STATUS "Git branch: ${GIT_BRANCH}")
-        add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
-    else()
-        message(STATUS "Git branch not found")
-        add_definitions(-DGIT_BRANCH=\"\")
-    endif()
-
-    execute_process(
-            COMMAND git rev-parse --short=8 HEAD
-            OUTPUT_VARIABLE GIT_HASH
-            RESULT_VARIABLE HASH_RESULT
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-    )
-    if(HASH_RESULT EQUAL 0)
-        message(STATUS "Git hash: ${GIT_HASH}")
-        add_definitions(-DGIT_HASH=\"${GIT_HASH}\")
-    else()
-        message(STATUS "Git hash not found")
-        add_definitions(-DGIT_HASH=\"-.-.-\")
-    endif()
-
-    execute_process(
-            COMMAND git describe --tags --abbrev=0
-            OUTPUT_VARIABLE GIT_TAG
-            RESULT_VARIABLE TAG_RESULT
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-    )
-    if(TAG_RESULT EQUAL 0)
-        message(STATUS "Git tag: ${GIT_TAG}")
-        add_definitions(-DGIT_TAG=\"${GIT_TAG}\")
-    else()
-        message(STATUS "Git tag not found")
-        add_definitions(-DGIT_TAG=\"unknown\")
-    endif()
-endif()
-
-# Setup compiler settings
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
-endif()
-
-# Set the project name
-set(CMAKE_PROJECT_NAME OpenPixelOSD LANGUAGES C ASM)
-
-# Include toolchain file
-include("cmake/gcc-arm-none-eabi.cmake")
-
-# Enable compile command to ease indexing with e.g. clangd
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-
-project(${CMAKE_PROJECT_NAME})
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
-
-add_executable(${CMAKE_PROJECT_NAME})
-
-
-if(TARGET_MCU STREQUAL "STM32G431")
-    message(STATUS "Building for STM32G431")
-    add_compile_definitions(
-            MCU_TYPE=\"STM32G431\"
-            STM32G431xx
-            LOW_RAM
-    )
-    set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/stm32g431cbux_flash.ld)
-    set(STARTUP_ASSEMBLY_FILE ./src/stm32g4xx/startup_stm32g431xx.s)
-elseif(TARGET_MCU STREQUAL "STM32G474")
-    message(STATUS "Building for STM32G474")
-    add_compile_definitions(
-            MCU_TYPE=\"STM32G474\"
-            STM32G474xx
-            HIGH_RAM
-    )
-    set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/stm32g474ceux_flash.ld)
-    set(STARTUP_ASSEMBLY_FILE ./src/stm32g4xx/startup_stm32g474xx.s)
-    set(SOURCE src/fonts/font_system.c)
-else()
+set(TARGET_MCU "STM32G431" CACHE STRING "Target MCU")
+set_property(CACHE TARGET_MCU PROPERTY STRINGS STM32G431 STM32G474)
+if(NOT TARGET_MCU MATCHES "^STM32G(431|474)$")
     message(FATAL_ERROR "Unsupported MCU type: ${TARGET_MCU}")
 endif()
 
-if(BUILD_VARIANT STREQUAL "VTX")
-    message(STATUS "Building with VTX support")
-    set(BUILD_NAME "_VTX")
-    add_compile_definitions(BUILD_VARIANT_VTX)
-    set(VTX_SRC
-            ./src/rtc6705.c
-            ./src/rf_pa.c
-            ./src/vtx_msp.c)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+if(NOT CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/cmake/gcc-arm-none-eabi.cmake")
+endif()
+project(OpenPixelOSD LANGUAGES C ASM)
+add_executable(${PROJECT_NAME})
+
+if(TARGET_MCU STREQUAL "STM32G431")
+    set(MCU_DEFINITIONS STM32G431xx LOW_RAM)
+    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/stm32g431cbux_flash.ld")
+    set(STARTUP_ASSEMBLY_FILE src/stm32g4xx/startup_stm32g431xx.s)
+else()
+    set(MCU_DEFINITIONS STM32G474xx HIGH_RAM)
+    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/stm32g474ceux_flash.ld")
+    set(STARTUP_ASSEMBLY_FILE src/stm32g4xx/startup_stm32g474xx.s)
+    set(MCU_SOURCES src/fonts/font_system.c)
 endif()
 
-add_compile_definitions(
-        USE_FULL_LL_DRIVER
-        USE_HAL_DRIVER
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    ${MCU_DEFINITIONS} MCU_TYPE="${TARGET_MCU}" USE_FULL_LL_DRIVER USE_HAL_DRIVER
 )
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
+
+# Git metadata works on Windows and Unix, and when building outside the source tree.
+find_package(Git QUIET)
+set(GIT_BRANCH "")
+set(GIT_HASH "")
+set(GIT_TAG "unknown")
+if(Git_FOUND)
+    foreach(kind IN ITEMS BRANCH HASH TAG)
+        if(kind STREQUAL "BRANCH")
+            set(args rev-parse --abbrev-ref HEAD)
+        elseif(kind STREQUAL "HASH")
+            set(args rev-parse --short=8 HEAD)
+        else()
+            set(args describe --tags --abbrev=0)
+        endif()
+        execute_process(COMMAND "${GIT_EXECUTABLE}" ${args}
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+            OUTPUT_VARIABLE value RESULT_VARIABLE result
+            OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+        if(result EQUAL 0)
+            if(kind STREQUAL "BRANCH")
+                string(SUBSTRING "${value}" 0 10 value)
+            endif()
+            set(GIT_${kind} "${value}")
+        endif()
+    endforeach()
+endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    GIT_BRANCH="${GIT_BRANCH}" GIT_HASH="${GIT_HASH}" GIT_TAG="${GIT_TAG}"
+)
 
 add_subdirectory(cmake/stm32)
-
-# Link directories setup
-target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-)
-
-# Add sources to executable
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+target_sources(${PROJECT_NAME} PRIVATE
         ${STARTUP_ASSEMBLY_FILE}
-        ${SOURCE}
-        ${VTX_SRC}
+        ${MCU_SOURCES}
         ./src/stm32g4xx/stm32g4xx_it.c
         ./src/stm32g4xx/system_stm32g4xx.c
         ./src/stm32g4xx/sysmem.c
         ./src/stm32g4xx/syscalls.c
         ./src/stm32g4xx/system.c
         ./src/msp/msp.c
-        ./src/gpio.c
-        ./src/dac.c
-        ./src/adc.c
-        ./src/dma.c
-        ./src/opamp.c
-        ./src/tim.c
-        ./src/comp.c
-        ./src/uart.c
-        ./src/usb.c
-        ./src/video_gen.c
-        ./src/video_overlay.c
-        ./src/canvas_char.c
-        ./src/msp_displayport.c
+        ./src/hardware/gpio.c
+        ./src/hardware/dac.c
+        ./src/hardware/adc.c
+        ./src/hardware/dma.c
+        ./src/hardware/opamp.c
+        ./src/hardware/tim.c
+        ./src/hardware/comp.c
+        ./src/hardware/uart.c
+        ./src/hardware/usb.c
+        ./src/render/video_gen.c
+        ./src/render/video_overlay.c
+        ./src/render/canvas_char.c
+        ./src/render/msp_displayport.c
         ./src/fonts/update_font.c
-        ./src/video_graphics.c
+        ./src/render/video_graphics.c
         ./src/main.c
 
 )
 
-# Add include paths
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        ./src/stm32g4xx
-        ./src/msp
-        ./src
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/stm32g4xx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/msp"
 )
-
-# Add project symbols (macros)
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-
+target_link_libraries(${PROJECT_NAME} PRIVATE stm32cubemx)
+target_link_options(${PROJECT_NAME} PRIVATE
+    "-T${LINKER_SCRIPT}" "-Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map"
 )
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_DEPENDS "${LINKER_SCRIPT}")
 
-# Add linked libraries
-target_link_libraries(${CMAKE_PROJECT_NAME}
-        stm32cubemx
-
-)
-
-
-# Generate hex and bin files
-set(HEX_FILE ${CMAKE_PROJECT_NAME}_${TARGET_MCU}${BUILD_NAME}.hex)
-set(BIN_FILE ${CMAKE_PROJECT_NAME}_${TARGET_MCU}${BUILD_NAME}.bin)
-
+set(HEX_FILE "${PROJECT_NAME}_${TARGET_MCU}.hex")
+set(BIN_FILE "${PROJECT_NAME}_${TARGET_MCU}.bin")
+set(MAP_FILE "${PROJECT_NAME}.map")
+set(ZIP_NAME "${PROJECT_NAME}_${TARGET_MCU}_${CMAKE_BUILD_TYPE}")
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}> ${PROJECT_BINARY_DIR}/${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}> ${PROJECT_BINARY_DIR}/${BIN_FILE}
-        COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}>)
-
-# make a zip file containing the hex, bin, map and elf
-set(ZIP_NAME "${CMAKE_PROJECT_NAME}_${TARGET_MCU}_${CMAKE_BUILD_TYPE}${BUILD_NAME}")
-set(TARGET_LANGUAGES "C;ASM")
-set(MAP_FILE "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME};LANGUAGES;${TARGET_LANGUAGES}.map")
-
-# Create ZIP after build completes
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Creating ${ZIP_NAME}.zip"
-        COMMAND ${CMAKE_COMMAND} -E tar "cf" "${ZIP_NAME}.zip" --format=zip
-        "${HEX_FILE}"
-        "${BIN_FILE}"
-        "${MAP_FILE}"
-        "$<TARGET_FILE:${PROJECT_NAME}>"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        COMMENT "Creating ZIP archive: ${ZIP_NAME}.zip"
+    COMMAND "${CMAKE_OBJCOPY}" -Oihex $<TARGET_FILE:${PROJECT_NAME}> "${HEX_FILE}"
+    COMMAND "${CMAKE_OBJCOPY}" -Obinary $<TARGET_FILE:${PROJECT_NAME}> "${BIN_FILE}"
+    COMMAND "${CMAKE_SIZE}" $<TARGET_FILE:${PROJECT_NAME}>
+    COMMAND "${CMAKE_COMMAND}" -E tar cf "${ZIP_NAME}.zip" --format=zip
+        "${HEX_FILE}" "${BIN_FILE}" "${MAP_FILE}" "$<TARGET_FILE_NAME:${PROJECT_NAME}>"
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    VERBATIM
 )
-
-# Flash the device using dfu-util
 add_custom_target(flash
-        COMMAND dfu-util -a 0 -s 0x08000000:leave -D ${PROJECT_BINARY_DIR}/${BIN_FILE} -R )
+    COMMAND dfu-util -a 0 -s 0x08000000:leave -D "${PROJECT_BINARY_DIR}/${BIN_FILE}" -R
+    DEPENDS ${PROJECT_NAME}
+    VERBATIM
+)

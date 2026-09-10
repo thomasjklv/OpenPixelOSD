@@ -15,7 +15,6 @@
 #include "stm32g4xx_ll_cortex.h"
 #include "stm32g4xx_ll_utils.h"
 #include "stm32g4xx_ll_pwr.h"
-#include "stm32g4xx_ll_spi.h"
 #include "stm32g4xx_ll_tim.h"
 #include "stm32g4xx_ll_usart.h"
 #include "stm32g4xx_ll_gpio.h"
@@ -38,6 +37,12 @@
 #define MCU_TYPE "---------"
 #endif /* MCU_TYPE */
 
+//#define USE_MSP
+#define DEBUG_LED_BLINK
+#define PAUSE_ON_FAILED_INIT 1
+
+
+
 typedef enum {
   PX_BLACK = 0,
   PX_TRANSPARENT,
@@ -48,9 +53,8 @@ typedef enum {
 // see adc.c - adc_init()
 typedef enum {
   ADC_CH_RESERVED = 0, // reserved
-  ADC_CH_PA_VDET = 1, // rf pa vdet signal
-  ADC_CH_TEMP = 2, // internal temperature sensor
-  ADC_CH_VREF_INT  = 3, // internal VREFINT
+  ADC_CH_TEMP = 1, // internal temperature sensor
+  ADC_CH_VREF_INT = 2, // internal VREFINT
   ADC_CH_COUNT
 } adc_ch_t;
 
@@ -75,34 +79,9 @@ typedef enum {
 #define COMP3_OUT_SYNC_EXT_TRIGGER_Pin LL_GPIO_PIN_7
 #define COMP3_OUT_SYNC_EXT_TRIGGER_GPIO_Port GPIOB
 
-//
-// VTX + PA support
-//
-
-// RTC6705 is driven by software, but using the same pins that would be used if it was driven in hardware.
-// If an SPI based RTC6705 replacement is available in the future, fewer changes would have to be made in both hardware
-// designs and software to accomodate this.
-//
-// For an RTC6705, when using hardware SPI MISO and MOSI can be connected to each other via a 330R resistor,
-// and then MISO is connected to the RTC6705's SPIDATA signal, in this configuration either hardware or software
-// can be used, clocking out 32 bits instead of the usual 25.
-//
-// Currently the code uses bitbanged IO to the RTC6705, using SPI2_MOSI/CLK/CS, see rtc6705.c defines.
-#define SPI2_CS_Pin LL_GPIO_PIN_12
-#define SPI2_CS_GPIO_Port GPIOB
-#define SPI2_SCK_Pin LL_GPIO_PIN_13
-#define SPI2_SCK_GPIO_Port GPIOB
-#define SPI2_MISO_Pin LL_GPIO_PIN_14
-#define SPI2_MISO_GPIO_Port GPIOB
-#define SPI2_MOSI_Pin LL_GPIO_PIN_15
-#define SPI2_MOSI_GPIO_Port GPIOB
-
 #define ADC_RESERVED_Pin LL_GPIO_PIN_1
 #define ADC_RESERVED_GPIO_Port GPIOB
 #define ADC_RESERVED_Channel LL_ADC_CHANNEL_12
-#define ADC_PA_VDET_Pin LL_GPIO_PIN_11
-#define ADC_PA_VDET_GPIO_Port GPIOB
-#define ADC_PA_VDET_Channel LL_ADC_CHANNEL_14
 
 //
 // Reserved pins for future features
@@ -117,10 +96,6 @@ typedef enum {
 #define FRSKY_PIXEL_OSD_TX_USART3_TX_GPIO_Port GPIOC
 #define FRSKY_PIXEL_OSD_RX_USART3_RX_Pin LL_GPIO_PIN_11
 #define FRSKY_PIXEL_OSD_RX_USART3_RX_GPIO_Port GPIOC
-
-// If RF PA VBIAS is expanded, then DAC1_OUT1 can be used to control the VBIAS voltage.
-#define RF_VBIAS_DAC1_OUT2_Pin LL_GPIO_PIN_5
-#define RF_VBIAS_DAC1_OUT2_GPIO_Port GPIOA
 
 // USER_KEY only used in GPIO init code, currently only used by developers.
 #define USER_KEY_Pin LL_GPIO_PIN_13
@@ -140,7 +115,7 @@ typedef enum {
 #define DAC8BIT_TO_MV(value)      (((uint32_t)(value) * 3300) / 255)
 #define DAC8BIT_FROM_MV(mV)       (((uint32_t)(mV) * 255) / 3300)
 
-#define VIDE_DETECTION_MV       (DAC12BIT_TO_MV(250)) // 250 mV for video detection
+#define VIDEO_DETECTION_DAC_VALUE DAC12BIT_FROM_MV(270)
 
 void gpio_init(void);
 void adc_init(void);
@@ -165,9 +140,5 @@ void TIM17_Init(void);
 
 void COMP3_Init(void);
 void COMP4_Init(void);
-
-/* Canvas character functions */
-EXEC_RAM void canvas_char_clean(void);
-EXEC_RAM void canvas_char_draw_complete(void);
 
 #endif /* __MAIN_H */

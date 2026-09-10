@@ -1,4 +1,5 @@
 # OpenPixelOSD
+Originally made by Cvetaevvitaliy
 
 OpenPixelOSD is an open-source project for generating and overlaying pixel graphics onto a video signal (OSD), based on the **STM32G431CBUx/** microcontroller.
 The project aims to create a software monochrome On-Screen Display (OSD) for VPV to phase out the obsolete *MAX7456* chip which has been discontinued

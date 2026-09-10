@@ -41,7 +41,7 @@ jobs:
         make -j"$(nproc)"
 
     - name: Check include paths and case
-      run: python3 python/check_includes.py build-${{ matrix.job_name }}/compile_commands.json
+      run: python3 tools/check_includes.py build-${{ matrix.job_name }}/compile_commands.json
 
     - name : Upload HEX
       uses: actions/upload-artifact@v4

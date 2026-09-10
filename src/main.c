@@ -40,7 +40,7 @@ int PAUSE(void){
     return 0;
 }
 
-int main (void)
+int main (void) 
 {
     startup()
         ? printf("Init SUCCESS.\r\n")
@@ -49,8 +49,8 @@ int main (void)
     while (1)
     {
         #ifdef USE_MSP
-        msp_loop_process();
-        logo_timeout_check();
+        extern bool show_logo;
+        !show_logo? msp_loop_process() : logo_timeout_check();
         #endif
 
         #ifdef DEBUG_LED_BLINK

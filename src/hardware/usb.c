@@ -4,7 +4,7 @@
  */
 #include <string.h>
 #include <stdbool.h>
-#include "usb.h"
+#include "hardware/usb.h"
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"

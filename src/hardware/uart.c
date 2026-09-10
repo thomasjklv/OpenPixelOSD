@@ -3,6 +3,7 @@
  * Copyright (C) 2025 Vitaliy N <vitaliy.nimych@gmail.com>
  */
 #include "main.h"
+#include "uart.h"
 #include <stdbool.h>
 #include <string.h>
 

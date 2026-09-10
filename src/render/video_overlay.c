@@ -35,7 +35,7 @@
 #define DAC_GRAY            DAC12BIT_FROM_MV(650)
 #define MAX_RENDER_LINE     (305) // for PAL
 
-#define LOGO_OFFSET_X       (120)
+#define LOGO_OFFSET_X       (100)
 #define LOGO_OFFSET_Y       (25)
 
 static uint16_t dac_buff[2][LINE_BUF_SZ];   // DAC double buffer for draw pixel (12-bit CH1)  DMA HALF_WORLD/WORLD
@@ -65,9 +65,9 @@ EXEC_RAM static void init_buffers()
 
 static void show_version(void)
 {
-    char str[COLUMN_SIZE];
-    sprintf(str, "FW: %s", FW_VERSION);
-    canvas_char_write(8, 9, str, strlen(str));
+   char str[COLUMN_SIZE];
+    sprintf(str, "FORKED BY: THOMASJKLV");
+    canvas_char_write(4, 9, str, strlen(str));
     sprintf(str, "MCU: %s", MCU_TYPE);
     canvas_char_write(8, 10, str, strlen(str));
     canvas_char_draw_complete();
@@ -107,7 +107,7 @@ void video_overlay_init(void)
     LL_TIM_CC_EnableChannel(TIM3, LL_TIM_CHANNEL_CH1);
 
     LL_DAC_Enable(DAC1, LL_DAC_CHANNEL_1);
-    LL_DAC_ConvertData12RightAligned(DAC1, LL_DAC_CHANNEL_1, VIDE_DETECTION_MV);
+    LL_DAC_ConvertData12RightAligned(DAC1, LL_DAC_CHANNEL_1, VIDEO_DETECTION_DAC_VALUE);
     LL_DAC_TrigSWConversion(DAC1, LL_DAC_CHANNEL_1);
 
     LL_DAC_Enable(DAC3, LL_DAC_CHANNEL_1);

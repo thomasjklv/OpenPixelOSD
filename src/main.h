@@ -40,6 +40,8 @@
 #define USE_MSP
 #define DEBUG_LED_BLINK
 #define PAUSE_ON_FAILED_INIT 1
+#define CAM_SWITCH
+
 
 // Match Telekatz/standard USART1 wiring: PA9 TX, PA10 RX.
 // Define INVERT_UART only for a board with physically swapped TX/RX pins.

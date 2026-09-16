@@ -50,11 +50,15 @@ int main (void)
     {
         #ifdef USE_MSP
         extern bool show_logo;
-        !show_logo? msp_loop_process() : logo_timeout_check();
+        show_logo? logo_timeout_check() : msp_loop_process();
         #endif
 
         #ifdef DEBUG_LED_BLINK
         led_blink();
+        #endif
+
+        #ifdef CAM_SWITCH
+        msp_camera_switch_process();
         #endif
     }
 }

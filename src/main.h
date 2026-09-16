@@ -40,8 +40,19 @@
 #define USE_MSP
 #define DEBUG_LED_BLINK
 #define PAUSE_ON_FAILED_INIT 1
+#define CAM_SWITCH
 
-#define INVERT_UART
+
+// Match Telekatz/standard USART1 wiring: PA9 TX, PA10 RX.
+// Define INVERT_UART only for a board with physically swapped TX/RX pins.
+ #define INVERT_UART
+
+// 360 pixels within the 50 us active-video window (170 MHz timer clock).
+#define VIDEO_PIXEL_TICKS 23U
+#define VIDEO_LINE_START_TICKS (5338U - (360U * VIDEO_PIXEL_TICKS) / 2U)
+#define VIDEO_LINE_END_TICKS 9690U // 57 us after the end of HSYNC
+#define VIDEO_BLACK_SAMPLE_TICKS 561U // 3.3 us, after color burst
+#define VIDEO_SYNC_SAMPLE_TICKS 1020U // 6 us into broad vertical sync
 
 
 typedef enum {
@@ -63,22 +74,20 @@ typedef enum {
 #define LED_STATE_GPIO_Port GPIOC
 
 //
-// Video detection/generation/overlay
+// Dual-camera video detection/overlay
 //
-#define COMP3_INP_VIDEO_IN_Pin LL_GPIO_PIN_0
-#define COMP3_INP_VIDEO_IN_GPIO_Port GPIOA
+// PA3 and PA7 are shared by the COMP2 and OPAMP1 input multiplexers.
+// PA0 and the old COMP3 sync route are no longer used.
 #define OPAMP1_VINPIO0_GRAY_COLOR_Pin LL_GPIO_PIN_1
 #define OPAMP1_VINPIO0_GRAY_COLOR_GPIO_Port GPIOA
 #define OPAMP1_VOUT_VIDEO_OUT_Pin LL_GPIO_PIN_2
 #define OPAMP1_VOUT_VIDEO_OUT_GPIO_Port GPIOA
-#define OPAMP1_VINPIO0_VIDEO_GEN_IN_Pin LL_GPIO_PIN_3
-#define OPAMP1_VINPIO0_VIDEO_GEN_IN_GPIO_Port GPIOA
-#define OPAMP1_VINPIO2_VIDEO_IN_Pin LL_GPIO_PIN_7
-#define OPAMP1_VINPIO2_VIDEO_IN_GPIO_Port GPIOA
+#define OPAMP1_VINPIO1_VIDEO1_IN_Pin LL_GPIO_PIN_3
+#define OPAMP1_VINPIO1_VIDEO1_IN_GPIO_Port GPIOA
+#define OPAMP1_VINPIO2_VIDEO2_IN_Pin LL_GPIO_PIN_7
+#define OPAMP1_VINPIO2_VIDEO2_IN_GPIO_Port GPIOA
 #define TIM17_CH1_VIDEO_GEN_OUT_Pin LL_GPIO_PIN_5
 #define TIM17_CH1_VIDEO_GEN_OUT_GPIO_Port GPIOB
-#define COMP3_OUT_SYNC_EXT_TRIGGER_Pin LL_GPIO_PIN_7
-#define COMP3_OUT_SYNC_EXT_TRIGGER_GPIO_Port GPIOB
 
 #define ADC_RESERVED_Pin LL_GPIO_PIN_1
 #define ADC_RESERVED_GPIO_Port GPIOB
@@ -116,7 +125,15 @@ typedef enum {
 #define DAC8BIT_TO_MV(value)      (((uint32_t)(value) * 3300) / 255)
 #define DAC8BIT_FROM_MV(mV)       (((uint32_t)(mV) * 255) / 3300)
 
-#define VIDEO_DETECTION_DAC_VALUE DAC12BIT_FROM_MV(270)
+// Telekatz scans the comparator reference when no valid field is found.
+#define VIDEO_SYNC_START_MV 300U
+#define VIDEO_SYNC_MIN_MV 25U
+#define VIDEO_SYNC_MAX_MV 800U
+#define VIDEO_SYNC_STEP_MV 25U
+#define VIDEO_SYNC_SCAN_MS 40U // allow two PAL fields at each threshold
+#define VIDEO_SYNC_LOST_MS 100U
+// Retained for the legacy (disabled) video generator.
+#define VIDEO_DETECTION_DAC_VALUE DAC12BIT_FROM_MV(VIDEO_SYNC_START_MV)
 
 void gpio_init(void);
 void adc_init(void);
@@ -136,10 +153,11 @@ void TIM1_Init(void);
 void TIM2_Init(void);
 void TIM3_Init(void);
 void TIM4_Init(void);
+void TIM15_Init(void);
 void TIM7_Init(void);
 void TIM17_Init(void);
 
-void COMP3_Init(void);
+void COMP2_Init(void);
 void COMP4_Init(void);
 
 #endif /* __MAIN_H */

@@ -1,10 +1,14 @@
+param(
+    [switch]$BuildOnly
+)
+
 $ErrorActionPreference = "Stop"
 
 # ---------------------------------------------------------
 # Paths
 # ---------------------------------------------------------
 
-$workspace = Resolve-Path (Join-Path $PSScriptRoot "..")
+$workspace = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $buildDir  = Join-Path $workspace "build"
 
 $cmakeCommand = Get-Command "cmake.exe" -ErrorAction SilentlyContinue
@@ -31,7 +35,31 @@ Write-Host " OpenPixelOSD - Configure"
 Write-Host "========================================"
 Write-Host ""
 
-& $cmake `
+# A copied or renamed checkout can contain a cache for the old location.
+# Let CMake regenerate its own cache and metadata without removing firmware
+# or other directories under build.
+$configureOptions = @()
+$cacheFile = Join-Path $buildDir "CMakeCache.txt"
+if (Test-Path -LiteralPath $cacheFile) {
+    $expectedPaths = @{
+        CMAKE_HOME_DIRECTORY = $workspace
+        CMAKE_CACHEFILE_DIR = $buildDir
+    }
+    foreach ($line in Get-Content -LiteralPath $cacheFile) {
+        if ($line -match '^(CMAKE_HOME_DIRECTORY|CMAKE_CACHEFILE_DIR):INTERNAL=(.*)$') {
+            $key = $Matches[1]
+            $cachedPath = [IO.Path]::GetFullPath($Matches[2]).TrimEnd('\', '/')
+            $expectedPath = [IO.Path]::GetFullPath($expectedPaths[$key]).TrimEnd('\', '/')
+            if (-not [string]::Equals($cachedPath, $expectedPath, [StringComparison]::OrdinalIgnoreCase)) {
+                Write-Host "Verouderde CMake-cache gevonden; configuratie wordt opnieuw aangemaakt."
+                $configureOptions = @('--fresh')
+                break
+            }
+        }
+    }
+}
+
+& $cmake @configureOptions `
     -S $workspace `
     -B $buildDir `
     -G Ninja `
@@ -83,6 +111,11 @@ Write-Host ""
 # ---------------------------------------------------------
 # Vragen of we moeten uploaden
 # ---------------------------------------------------------
+
+if ($BuildOnly) {
+    Write-Host "BuildOnly: upload overgeslagen."
+    exit 0
+}
 
 $upload = Read-Host "Wil je de firmware nu uploaden via USB DFU? [j/N]"
 

@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include "font_system.h"
+#include <stdint.h>
 
 #if defined(__GNUC__)
 #define FONT_SECTION __attribute__((section(".system_font")))
@@ -10,6 +10,7 @@
 /* Auto-generated 1bpp font table (flat array).
  * Data is MSB-first row-major, FONT_SYSTEM_STRIDE bytes per glyph.
  */
+// clang-format off: preserve generated pixel data layout
 const uint8_t font_system[FONT_SYSTEM_COUNT * FONT_SYSTEM_STRIDE] FONT_SECTION = {
 /* Hex 0x00, Char '' */
   0x00, 0x00, 0x66, 0x42, 0x00, 0x42, 0x42, 0x42, 0x00, 0x42, 0x42, 0x66, 0x00, 0x00, 0x00, 0x00, 
@@ -1548,3 +1549,4 @@ const uint8_t font_system[FONT_SYSTEM_COUNT * FONT_SYSTEM_STRIDE] FONT_SECTION =
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
 
 };
+// clang-format on

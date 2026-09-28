@@ -40,17 +40,51 @@
 #include "vtx_power_levels.h"
 
 const vtx_power_level_t g_vtx_power_level_defaults[] = {
-    { 0,   RTC6705_PA_3dBm,  false, {3200,3200,3200,3200,3200,3200,3200,3200,3200}, {0,0,0,0,0,0,0,0,0} }, // level 1: PAOUT1 off, Q2 off -- matches pit-mode baseline (~310mA)
-    { 0,   RTC6705_PA_3dBm,  false, {2400,2400,2400,2400,2400,2400,2400,2400,2400}, {0,0,0,0,0,0,0,0,0} }, // level 2: PAOUT1 off, Q2 off -- with a more DC bias
-    { 0,   RTC6705_PA_7dBm,  false, {3200,3200,3200,3200,3200,3200,3200,3200,3200}, {0,0,0,0,0,0,0,0,0} }, // level 3: PAOUT1 on, Q2 off -- RTC6705's own drive alone, no boost
-    { 0,   RTC6705_PA_7dBm,  false, {2400,2400,2400,2400,2400,2400,2400,2400,2400}, {0,0,0,0,0,0,0,0,0} }, // level 4: PAOUT1 on, Q2 off -- with more DC bias
-    { 10,  RTC6705_PA_3dBm,  true,  {2790,2790,2790,2790,2790,2790,2790,2790,2790}, {138,138,138,138,138,138,138,138,138} }, // level 5: boost on
-    { 25,  RTC6705_PA_3dBm,  true,  {2775,2775,2775,2775,2775,2775,2775,2775,2775}, {200,200,200,200,200,200,200,200,200} }, // level 6: boost on
-    { 50,  RTC6705_PA_7dBm,  true,  {2750,2750,2750,2750,2750,2750,2750,2750,2750}, {260,260,260,260,260,260,260,260,260} }, // level 7: boost on
-    { 100, RTC6705_PA_7dBm,  true,  {2710,2710,2710,2710,2710,2710,2710,2710,2710}, {300,300,300,300,300,300,300,300,300} }, // level 8: boost on
+    {0,
+     RTC6705_PA_3dBm,
+     false,
+     {3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 1: PAOUT1 off, Q2 off -- matches pit-mode baseline (~310mA)
+    {0,
+     RTC6705_PA_3dBm,
+     false,
+     {2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 2: PAOUT1 off, Q2 off -- with a more DC bias
+    {0,
+     RTC6705_PA_7dBm,
+     false,
+     {3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 3: PAOUT1 on, Q2 off -- RTC6705's own drive alone, no boost
+    {0,
+     RTC6705_PA_7dBm,
+     false,
+     {2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 4: PAOUT1 on, Q2 off -- with more DC bias
+    {10,
+     RTC6705_PA_3dBm,
+     true,
+     {2790, 2790, 2790, 2790, 2790, 2790, 2790, 2790, 2790},
+     {138, 138, 138, 138, 138, 138, 138, 138, 138}},  // level 5: boost on
+    {25,
+     RTC6705_PA_3dBm,
+     true,
+     {2775, 2775, 2775, 2775, 2775, 2775, 2775, 2775, 2775},
+     {200, 200, 200, 200, 200, 200, 200, 200, 200}},  // level 6: boost on
+    {50,
+     RTC6705_PA_7dBm,
+     true,
+     {2750, 2750, 2750, 2750, 2750, 2750, 2750, 2750, 2750},
+     {260, 260, 260, 260, 260, 260, 260, 260, 260}},  // level 7: boost on
+    {100,
+     RTC6705_PA_7dBm,
+     true,
+     {2710, 2710, 2710, 2710, 2710, 2710, 2710, 2710, 2710},
+     {300, 300, 300, 300, 300, 300, 300, 300, 300}},  // level 8: boost on
 };
 
-const uint8_t g_vtx_power_level_default_count = sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
+const uint8_t g_vtx_power_level_default_count =
+    sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
 
-const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658,5695,5760,5800,5840,5905,5945};
-const uint8_t g_vtx_cal_freq_default_count = sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);
+const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658, 5695, 5760, 5800, 5840, 5905, 5945};
+const uint8_t g_vtx_cal_freq_default_count =
+    sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);

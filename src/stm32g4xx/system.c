@@ -7,11 +7,9 @@
 void Error_Handler(void)
 {
     __disable_irq();
-    while (1)
-    {
+    while(1) {
     }
 }
-
 
 void SystemClock_Config(void)
 {
@@ -19,8 +17,7 @@ void SystemClock_Config(void)
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_4)
-    {
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_4) {
     }
     LL_PWR_EnableRange1BoostMode();
 
@@ -28,21 +25,18 @@ void SystemClock_Config(void)
     LL_RCC_HSI_SetCalibTrimming(64);
     LL_RCC_HSI_Enable();
     /* Wait till HSI48 is ready */
-    while(LL_RCC_HSI48_IsReady() != 1)
-    {
+    while(LL_RCC_HSI48_IsReady() != 1) {
     }
 #else
     LL_RCC_HSE_Enable();
     /* Wait till HSE is ready */
-    while(LL_RCC_HSE_IsReady() != 1)
-    {
+    while(LL_RCC_HSE_IsReady() != 1) {
     }
 #endif
 
-LL_RCC_HSI48_Enable();
+    LL_RCC_HSI48_Enable();
     /* Wait till HSI48 is ready */
-    while(LL_RCC_HSI48_IsReady() != 1)
-    {
+    while(LL_RCC_HSI48_IsReady() != 1) {
     }
 
 #if defined(BUILD_VARIANT_NO_OSC)
@@ -53,19 +47,18 @@ LL_RCC_HSI48_Enable();
     LL_RCC_PLL_EnableDomain_SYS();
     LL_RCC_PLL_Enable();
     /* Wait till PLL is ready */
-    while(LL_RCC_PLL_IsReady() != 1)
-    {
+    while(LL_RCC_PLL_IsReady() != 1) {
     }
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
     /* Wait till System clock is ready */
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-    {
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
     }
 
     /* Insure 1us transition state at intermediate medium speed clock*/
-    for (__IO uint32_t i = (170 >> 1); i !=0; i--);
+    for(__IO uint32_t i = (170 >> 1); i != 0; i--)
+        ;
 
     /* Set AHB prescaler*/
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
@@ -74,8 +67,7 @@ LL_RCC_HSI48_Enable();
     LL_SetSystemCoreClock(170000000);
 
     /* Update the time base */
-    if (HAL_InitTick (TICK_INT_PRIORITY) != HAL_OK)
-    {
+    if(HAL_InitTick(TICK_INT_PRIORITY) != HAL_OK) {
         Error_Handler();
     }
 #if defined(BUILD_VARIANT_MCO)

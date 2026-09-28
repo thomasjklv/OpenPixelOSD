@@ -1,20 +1,20 @@
 #pragma once
-#include <stdint.h>
 
-#define FONT_WIDTH      (12)
-#define FONT_HEIGHT     (18)
+#define FONT_WIDTH  (12)
+#define FONT_HEIGHT (18)
 
-#define FONT_BPP        (4) // 2bits per pixel
-#define FONT_CHARS      (256)
-#define BYTES_PER_ROW   ((FONT_WIDTH * FONT_BPP) / 8)     // = 6
-#define BYTES_PER_CHAR  (BYTES_PER_ROW * FONT_HEIGHT)     // = 108
-#define FONT_STRIDE     (sizeof(font_data) / FONT_CHARS)  // = 128
+#define FONT_BPP       (4)  // 2bits per pixel
+#define FONT_CHARS     (256)
+#define BYTES_PER_ROW  ((FONT_WIDTH * FONT_BPP) / 8)     // = 6
+#define BYTES_PER_CHAR (BYTES_PER_ROW * FONT_HEIGHT)     // = 108
+#define FONT_STRIDE    (sizeof(font_data) / FONT_CHARS)  // = 128
 
 #include <stdint.h>
 
 typedef uint16_t font_t;
 
 __attribute__((section(".font")))
+// clang-format off: preserve generated pixel data layout
 const font_t font_data[] = {
   /* Character 0x00 */ 
    0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111,
@@ -1297,3 +1297,4 @@ const font_t font_data[] = {
    0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111,
    0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
 };
+// clang-format on

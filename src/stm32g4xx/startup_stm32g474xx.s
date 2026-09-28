@@ -97,7 +97,7 @@ LoopCopyDataInit:
     cmp r4, r1
     bcc CopyCcmInit
 /* End of copy to CCMRAM */
-  
+
 /* Zero fill the bss segment. */
   ldr r2, =_sbss
   ldr r4, =_ebss
@@ -125,7 +125,7 @@ FillZeroCcmBss:
 LoopFillZeroCcmBss:
   cmp r2, r4
   bcc FillZeroCcmBss
-  
+
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/
@@ -619,4 +619,3 @@ g_pfnVectors:
 
 	.weak	FMAC_IRQHandler
 	.thumb_set FMAC_IRQHandler,Default_Handler
-

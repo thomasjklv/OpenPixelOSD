@@ -182,10 +182,10 @@ if(TARGET_USE_VTX)
     set(BUILD_NAME "${BUILD_NAME}_VTX")
     add_compile_definitions(USE_VTX)
     set(VTX_SRC
-            ./src/rtc6705.c
-            ./src/rf_pa.c
-            ./src/vtx_msp.c
-            ./src/vtx_power_levels.c
+            ./src/vtx/rtc6705.c
+            ./src/vtx/rf_pa.c
+            ./src/vtx/vtx_msp.c
+            ./src/vtx/vtx_power_levels.c
             "${TARGET_BOARD_DIR}/target.c")
 endif()
 
@@ -266,26 +266,26 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         ./src/stm32g4xx/system.c
         ./src/stm32g4xx/dbgu.c
         ./src/msp/msp.c
-        ./src/adc.c
-        ./src/canvas_char.c
-        ./src/comp.c
-        ./src/dac.c
-        ./src/dma.c
-        ./src/flash.c
-        ./src/gpio.c
-        ./src/led.c
-        ./src/msp_displayport.c
-        ./src/msp_fc.c
-        ./src/opamp.c
-        ./src/settings.c
-        ./src/settingsMenu.c
-        ./src/tim.c
-        ./src/video_color.c
-        ./src/video_gen.c
-        ./src/video_graphics.c
-        ./src/video_overlay.c
-        ./src/uart.c
-        ./src/usb.c
+        ./src/drivers/adc.c
+        ./src/video/canvas_char.c
+        ./src/drivers/comp.c
+        ./src/drivers/dac.c
+        ./src/drivers/dma.c
+        ./src/drivers/flash.c
+        ./src/drivers/gpio.c
+        ./src/drivers/led.c
+        ./src/msp/msp_displayport.c
+        ./src/msp/msp_fc.c
+        ./src/drivers/opamp.c
+        ./src/settings/settings.c
+        ./src/settings/settingsMenu.c
+        ./src/drivers/tim.c
+        ./src/video/video_color.c
+        ./src/video/video_gen.c
+        ./src/video/video_graphics.c
+        ./src/video/video_overlay.c
+        ./src/drivers/uart.c
+        ./src/drivers/usb.c
         ./src/main.c
         ./src/fonts/update_font.c
 )
@@ -295,6 +295,10 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         ${TARGET_BOARD_DIR}
         ./src/stm32g4xx
         ./src/msp
+        ./src/drivers
+        ./src/video
+        ./src/settings
+        ./src/vtx
         ./src
 )
 

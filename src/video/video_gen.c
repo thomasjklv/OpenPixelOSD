@@ -1,0 +1,510 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/**
+ * Copyright (C) 2025 Vitaliy N <vitaliy.nimych@gmail.com>
+ */
+#include "video_gen.h"
+#include "main.h"
+#include "video_overlay.h"
+#include <stdbool.h>
+
+#define INTERLACED_GEN 1
+
+#define NTSC_LINE_FREQ       15734.2657f
+#define PAL_LINE_FREQ        15625.f
+#define GEN_TIMER_CLOCK_FREQ (170000000)
+#define PAL_HSYNC_TIME       (0.0000047f)
+#define PAL_LSYNC_TIME       (0.0000273f)
+#define PAL_LINE_TIME        (0.0000640f)
+
+#define LINE_FREQ_NTSC ((GEN_TIMER_CLOCK_FREQ / NTSC_LINE_FREQ + 0.5f) / 2)
+#define LINE_FREQ_PAL  ((GEN_TIMER_CLOCK_FREQ / PAL_LINE_FREQ + 0.5f) / 2)
+
+#define PAL_LINE (PAL_LINE_TIME * GEN_TIMER_CLOCK_FREQ)
+
+#define N_SYNC  (PAL_HSYNC_TIME * GEN_TIMER_CLOCK_FREQ)
+#define P_SYNC  (PAL_LINE - N_SYNC)
+#define P_SSYNC ((PAL_LINE / 2) - N_SYNC)
+
+#define N_LSYNC (PAL_LSYNC_TIME * GEN_TIMER_CLOCK_FREQ)
+#define P_LSYNC ((PAL_LINE / 2) - N_LSYNC)
+
+#define N_HSYNC  ((N_SYNC / 2))
+#define P_HSYNC  ((PAL_LINE / 2) - N_HSYNC)
+#define P_HLSYNC ((PAL_LINE) - N_HSYNC)
+
+#define SYNC   N_SYNC, P_SYNC
+#define SSYNC  N_SYNC, P_SSYNC
+#define LSYNC  N_LSYNC, P_LSYNC
+#define HSYNC  N_HSYNC, P_HSYNC
+#define HLSYNC N_HSYNC, P_HLSYNC
+
+// Reverence timing, interlaced, progressive(non-interlaced) : https://martin.hinner.info/vga/pal.html
+#if INTERLACED_GEN
+// Blank PAL (interlaced) TODO: add NTSC
+#define GEN_BLANK_PAL_LINES (625 * 2 + 15 * 2)  // 2 fields per line + 15 * 2 half lines
+const uint16_t blank_pal_signal[GEN_BLANK_PAL_LINES] = {
+    LSYNC, LSYNC,  // line 1
+    LSYNC, LSYNC,  // line 2
+    LSYNC, HSYNC,  // line 3
+    HSYNC, HSYNC,  // line 4
+    HSYNC, HSYNC,  // line 5
+
+    //  Field 1
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 6-15
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 16-25
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 26-35
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 36-45
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 46-55
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 56-65
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 66-75
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 76-85
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 86-95
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 96-105
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 106-115
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 116-125
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 126-135
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 136-145
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 146-155
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 156-165
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 166-175
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 176-185
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 186-195
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 196-205
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 206-215
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 216-225
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 226-235
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 236-245
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 246-255
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 256-265
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 266-275
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 276-285
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 286-295
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 296-305
+    SYNC, SYNC, SYNC, SYNC, SYNC,                                // line 306-310
+    HSYNC, HSYNC,                                                // line 311
+    HSYNC, HSYNC,                                                // line 312
+    HSYNC, LSYNC,                                                // line 313
+
+    LSYNC, LSYNC,  // line 314
+    LSYNC, LSYNC,  // line 315
+    HSYNC, HSYNC,  // line 316
+    HSYNC, HSYNC,  // line 317
+    //  Field 2
+    HLSYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,  // line 318-327
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 328-337
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 338-347
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 348-357
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 358-367
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 368-377
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 378-387
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 388-397
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 398-407
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 408-417
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 418-427
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 428-437
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 438-447
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 448-457
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 458-467
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 468-477
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 478-487
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 488-497
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 498-507
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 408-517
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 418-527
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 428-537
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 448-547
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 458-557
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 468-567
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 478-577
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 488-587
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 498-597
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 408-607
+    SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC, SYNC,    // line 418-617
+    SYNC, SYNC, SYNC, SYNC, SYNC,                                  // line 618-622
+
+    SSYNC, HSYNC,  // line 623
+    HSYNC, HSYNC,  // line 624
+    HSYNC, HSYNC   // line 625
+};
+#else
+// Blank PAL (non-interlaced) TODO: add NTSC
+#define GEN_BLANK_PAL_LINES (312 * 2 + 7 * 2)  // 2 fields per line + 7 * 2 half lines
+volatile const uint16_t blank_pal_signal[GEN_BLANK_PAL_LINES] = {
+    LSYNC,
+    LSYNC,  // line 1
+    LSYNC,
+    LSYNC,  // line 2
+    LSYNC,
+    HSYNC,  // line 3
+    HSYNC,
+    HSYNC,  // line 4
+    HSYNC,
+    HSYNC,  // line 5
+
+    //  Field 1
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 6-15
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 16-25
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 26-35
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 36-45
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 46-55
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 56-65
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 66-75
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 76-85
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 86-95
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 96-105
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 106-115
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 116-125
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 126-135
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 136-145
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 146-155
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 156-165
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 166-175
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 176-185
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 186-195
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 196-205
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 206-215
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 216-225
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 226-235
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 236-245
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 246-255
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 256-265
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 266-275
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 276-285
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 286-295
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 296-305
+    SYNC,
+    SYNC,
+    SYNC,
+    SYNC,  // line 306-309
+    SYNC,  // line 310 NOTE: reducing flicker on some monitors
+           // HSYNC,HSYNC, // line 310
+    HSYNC,
+    HSYNC,  // line 311
+    HSYNC,
+    HSYNC,  // line 312
+
+};
+#endif
+
+CCMRAM_BSS volatile bool video_gen_enabled = false;
+
+void video_gen_start(void)
+{
+    if(video_gen_enabled == false) {
+        LL_TIM_CC_EnableChannel(TIM17, LL_TIM_CHANNEL_CH1);
+        LL_TIM_EnableAllOutputs(TIM17);
+        LL_TIM_SetCounter(TIM17, 0);
+
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_6);
+        LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_6, (uint32_t)blank_pal_signal);
+        LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_6, (uint32_t)&TIM17->ARR);
+        LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_6, GEN_BLANK_PAL_LINES);
+        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_6);
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+        LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)&sync_levels);
+        LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)&DAC3->DHR12R1);
+        LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, 2);
+        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+
+        LL_TIM_DisableCounter(TIM15);
+        LL_TIM_SetTriggerInput(TIM15, LL_TIM_TS_ITR8);
+
+        LL_TIM_EnableCounter(TIM17);
+        LL_TIM_EnableDMAReq_CC1(TIM17);
+        LL_TIM_EnableDMAReq_UPDATE(TIM17);
+
+        LL_TIM_DisableIT_CC1(TIM3);
+        LL_TIM_DisableIT_UPDATE(TIM3);
+
+        video_gen_enabled = true;
+    }
+}
+
+void video_gen_stop(void)
+{
+    if(video_gen_enabled == true) {
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_6);
+        LL_TIM_DisableCounter(TIM17);
+        LL_TIM_DisableAllOutputs(TIM17);
+        LL_TIM_DisableDMAReq_CC1(TIM17);
+        LL_TIM_DisableDMAReq_UPDATE(TIM17);
+        LL_TIM_DisableCounter(TIM15);
+        LL_TIM_SetTriggerInput(TIM15, LL_TIM_TS_ITR1);
+
+        LL_TIM_EnableIT_CC1(TIM3);
+        LL_TIM_EnableIT_UPDATE(TIM3);
+
+        video_gen_enabled = false;
+    }
+}

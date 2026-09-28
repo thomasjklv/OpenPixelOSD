@@ -13,13 +13,13 @@
 #define TARGETS_GENERIC_VTX_TARGET_H
 
 typedef enum {
-  ADC1_CH_RESERVED = 0,
-  ADC1_CH_TEMP,
-  ADC1_CH_VREF_INT,
-  ADC1_CH_COUNT
+    ADC1_CH_RESERVED = 0,
+    ADC1_CH_TEMP,
+    ADC1_CH_VREF_INT,
+    ADC1_CH_COUNT
 } adc1_ch_t;
 
-#define LED_STATE_Pin LL_GPIO_PIN_6
+#define LED_STATE_Pin       LL_GPIO_PIN_6
 #define LED_STATE_GPIO_Port GPIOC
 
 //
@@ -35,42 +35,42 @@ typedef enum {
 // can be used, clocking out 32 bits instead of the usual 25.
 //
 // Currently the code uses bitbanged IO to the RTC6705, using SPI2_MOSI/CLK/CS, see rtc6705.c defines.
-#define SPI2_CS_Pin LL_GPIO_PIN_12
-#define SPI2_CS_GPIO_Port GPIOB
-#define SPI2_SCK_Pin LL_GPIO_PIN_13
-#define SPI2_SCK_GPIO_Port GPIOB
-#define SPI2_MISO_Pin LL_GPIO_PIN_14
+#define SPI2_CS_Pin         LL_GPIO_PIN_12
+#define SPI2_CS_GPIO_Port   GPIOB
+#define SPI2_SCK_Pin        LL_GPIO_PIN_13
+#define SPI2_SCK_GPIO_Port  GPIOB
+#define SPI2_MISO_Pin       LL_GPIO_PIN_14
 #define SPI2_MISO_GPIO_Port GPIOB
-#define SPI2_MOSI_Pin LL_GPIO_PIN_15
+#define SPI2_MOSI_Pin       LL_GPIO_PIN_15
 #define SPI2_MOSI_GPIO_Port GPIOB
 
-#define ADC_RESERVED_Pin LL_GPIO_PIN_1
+#define ADC_RESERVED_Pin       LL_GPIO_PIN_1
 #define ADC_RESERVED_GPIO_Port GPIOB
-#define ADC_RESERVED_Channel LL_ADC_CHANNEL_12
-#define ADC_RESERVED_INSTANCE ADC_INSTANCE_1
+#define ADC_RESERVED_Channel   LL_ADC_CHANNEL_12
+#define ADC_RESERVED_INSTANCE  ADC_INSTANCE_1
 
 //
 // Reserved pins for future features
 //
 
 // If RGB LED support is added, then TIM8 has required features for driving by DMA.
-#define RGBLED_TIM8_CH1_Pin LL_GPIO_PIN_15
+#define RGBLED_TIM8_CH1_Pin       LL_GPIO_PIN_15
 #define RGBLED_TIM8_CH1_GPIO_Port GPIOA
 
 // If FRSKY PixelOSD protocol is added, a second UART can be used.
-#define FRSKY_PIXEL_OSD_TX_USART3_TX_Pin LL_GPIO_PIN_10
+#define FRSKY_PIXEL_OSD_TX_USART3_TX_Pin       LL_GPIO_PIN_10
 #define FRSKY_PIXEL_OSD_TX_USART3_TX_GPIO_Port GPIOC
-#define FRSKY_PIXEL_OSD_RX_USART3_RX_Pin LL_GPIO_PIN_11
+#define FRSKY_PIXEL_OSD_RX_USART3_RX_Pin       LL_GPIO_PIN_11
 #define FRSKY_PIXEL_OSD_RX_USART3_RX_GPIO_Port GPIOC
 
 // If FDCAN support is added then these pins are required.
-#define FDCAN1_TX_Pin LL_GPIO_PIN_9
+#define FDCAN1_TX_Pin       LL_GPIO_PIN_9
 #define FDCAN1_TX_GPIO_Port GPIOB
-#define FDCAN1_RX_Pin LL_GPIO_PIN_8
+#define FDCAN1_RX_Pin       LL_GPIO_PIN_8
 #define FDCAN1_RX_GPIO_Port GPIOB
 
 // USER_KEY only used in GPIO init code, currently only used by developers.
-#define USER_KEY_Pin LL_GPIO_PIN_13
+#define USER_KEY_Pin       LL_GPIO_PIN_13
 #define USER_KEY_GPIO_Port GPIOC
 
-#endif //TARGETS_GENERIC_VTX_TARGET_H
+#endif  // TARGETS_GENERIC_VTX_TARGET_H

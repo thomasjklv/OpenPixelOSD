@@ -18,9 +18,15 @@ cmake/                               - toolchain & stm32 library CMake scripts
 python/                              - helper scripts (font/logo conversion, font upload)
 USB_Device/, Drivers/, Middlewares/  - STM32Cube generated code
 src/                                 - firmware source (C code)
-  stm32g4xx/                         - device startup, HAL configuration
-  msp/                               - MSP protocol parser/handler
-  fonts/, logo/                      - embedded font/logo data and updater
+  main.c, main.h                     - program entry and shared definitions
+  drivers/                           - peripherals, flash, LEDs, UART and USB
+  video/                             - video generation, overlay and rendering
+  settings/                          - persistent settings and OSD menu
+  vtx/                               - transmitter and power-amplifier control
+  msp/                               - MSP protocol, DisplayPort and flight controller
+  fonts/, logo/                      - font handling and graphical assets
+  stm32g4xx/                         - STM32 startup, interrupts and system support
+  targets/                           - board-specific configuration
 CMakeLists.txt                       - top‑level build file
 ```
 
@@ -28,11 +34,11 @@ CMakeLists.txt                       - top‑level build file
 
 - `src/main.c` – program entry. Initializes hardware modules, then continually processes **MSP** messages and blinks an **LED**.
 
-- `src/video_overlay.c` – core video overlay logic. Sets up **DACs**, timers and comparators to mix the generated OSD pixels with the incoming video signal.
+- `src/video/video_overlay.c` – core video overlay logic. Sets up **DACs**, timers and comparators to mix the generated OSD pixels with the incoming video signal.
 
 - `src/msp/` – implements the **MultiWii Serial Protocol** (MSP) for interacting with flight controllers.
 
-- `src/canvas_char.*` – double‑buffered character canvas used for text rendering onto the video overlay.
+- `src/video/canvas_char.*` – double‑buffered character canvas used for text rendering onto the video overlay.
 
 - `python/` – scripts to convert fonts or bitmaps into C arrays for embedding. For example, `convert_logo.py` reads an image, maps colors to 2‑bpp pixels, and outputs a header file. `font_updater.py` sends font data over serial using **MSP** commands.
 

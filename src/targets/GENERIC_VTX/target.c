@@ -18,10 +18,10 @@
 #include "vtx_power_levels.h"
 
 const vtx_power_level_t g_vtx_power_levels[] = {
-    { 2,  RTC6705_PA_3dBm   },
-    { 5,  RTC6705_PA_7dBm   },
-    { 12, RTC6705_PA_11dBm  },
-    { 20, RTC6705_PA_13dBm  },
+    {2, RTC6705_PA_3dBm},
+    {5, RTC6705_PA_7dBm},
+    {12, RTC6705_PA_11dBm},
+    {20, RTC6705_PA_13dBm},
 };
 
 const uint8_t g_vtx_power_level_count = sizeof(g_vtx_power_levels) / sizeof(g_vtx_power_levels[0]);

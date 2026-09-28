@@ -37,17 +37,51 @@
 #include "vtx_power_levels.h"
 
 const vtx_power_level_t g_vtx_power_level_defaults[] = {
-    { 1,   RTC6705_PA_3dBm,  false, {0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0} },                      // level 1: RTC6705 alone, PA disabled
-    { 2,   RTC6705_PA_7dBm,  false, {0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0} },                      // level 2: RTC6705 alone, PA disabled
-    { 5,   RTC6705_PA_3dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 3: PA enabled, closed loop to VDET target
-    { 10,  RTC6705_PA_3dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 4: PA enabled, closed loop to VDET target
-    { 25,  RTC6705_PA_7dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 5: PA enabled, closed loop to VDET target
-    { 50,  RTC6705_PA_7dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 6: PA enabled, closed loop to VDET target
-    { 100, RTC6705_PA_7dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 7: PA enabled, closed loop to VDET target
-    { 200, RTC6705_PA_7dBm,  true,  {0,0,0,0,0,0,0,0,0}, {100,100,100,100,100,100,100,100,100} },        // level 8: PA enabled, closed loop to VDET target
+    {1,
+     RTC6705_PA_3dBm,
+     false,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 1: RTC6705 alone, PA disabled
+    {2,
+     RTC6705_PA_7dBm,
+     false,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {0, 0, 0, 0, 0, 0, 0, 0, 0}},  // level 2: RTC6705 alone, PA disabled
+    {5,
+     RTC6705_PA_3dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 3: PA enabled, closed loop to VDET target
+    {10,
+     RTC6705_PA_3dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 4: PA enabled, closed loop to VDET target
+    {25,
+     RTC6705_PA_7dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 5: PA enabled, closed loop to VDET target
+    {50,
+     RTC6705_PA_7dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 6: PA enabled, closed loop to VDET target
+    {100,
+     RTC6705_PA_7dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 7: PA enabled, closed loop to VDET target
+    {200,
+     RTC6705_PA_7dBm,
+     true,
+     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+     {100, 100, 100, 100, 100, 100, 100, 100, 100}},  // level 8: PA enabled, closed loop to VDET target
 };
 
-const uint8_t g_vtx_power_level_default_count = sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
+const uint8_t g_vtx_power_level_default_count =
+    sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
 
-const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658,5695,5760,5800,5840,5905,5945};
-const uint8_t g_vtx_cal_freq_default_count = sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);
+const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658, 5695, 5760, 5800, 5840, 5905, 5945};
+const uint8_t g_vtx_cal_freq_default_count =
+    sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);

@@ -1,20 +1,20 @@
 #pragma once
-#include <stdint.h>
 
-#define FONT_WIDTH      (12)
-#define FONT_HEIGHT     (18)
+#define FONT_WIDTH  (12)
+#define FONT_HEIGHT (18)
 
-#define FONT_BPP        (2) // 2bits per pixel
-#define FONT_CHARS      (256)
-#define BYTES_PER_ROW   ((FONT_WIDTH * FONT_BPP) / 8)     // = 3
-#define BYTES_PER_CHAR  (BYTES_PER_ROW * FONT_HEIGHT)     // = 54
-#define FONT_STRIDE     (sizeof(font_data) / FONT_CHARS)  // = 64
+#define FONT_BPP       (2)  // 2bits per pixel
+#define FONT_CHARS     (256)
+#define BYTES_PER_ROW  ((FONT_WIDTH * FONT_BPP) / 8)     // = 3
+#define BYTES_PER_CHAR (BYTES_PER_ROW * FONT_HEIGHT)     // = 54
+#define FONT_STRIDE    (sizeof(font_data) / FONT_CHARS)  // = 64
 
 #include <stdint.h>
 
 typedef uint8_t font_t;
 
 __attribute__((section(".font")))
+// clang-format off: preserve generated pixel data layout
 const font_t font_data[16384] = {
 /* Character 0x00 */
     0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55,
@@ -1553,3 +1553,4 @@ const font_t font_data[16384] = {
     0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55
 
 };
+// clang-format on

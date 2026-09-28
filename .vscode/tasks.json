@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "OpenPixelOSD: Build + optional Upload",
+      "type": "process",
+      "command": "${env:SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\.vscode\\build-flash.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "C:\\Program Files\\CMake\\bin;C:\\Program Files (x86)\\Arm GNU Toolchain arm-none-eabi\\14.2 rel1\\bin;${env:LOCALAPPDATA}\\Microsoft\\WinGet\\Links;${env:PATH}"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$gcc",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true,
+        "focus": true
+      }
+    }
+  ]
+}

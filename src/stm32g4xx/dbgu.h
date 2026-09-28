@@ -3,7 +3,3 @@
 #include <stdint.h>
 
 void SWO_Init();
-
-
-
-

@@ -18,11 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define MSP2_COMMON_SERIAL_CONFIG       0x1009
-#define MSP2_COMMON_SET_SERIAL_CONFIG   0x100A
+#define MSP2_COMMON_SERIAL_CONFIG     0x1009
+#define MSP2_COMMON_SET_SERIAL_CONFIG 0x100A
 
 // Sensors
-#define MSP2_SENSOR_GPS                 0x1F03
+#define MSP2_SENSOR_GPS 0x1F03
 // TODO: implement new, extensible rangefinder protocol
 #define MSP2_SENSOR_RANGEFINDER_LIDARMT 0x1F01
 #define MSP2_SENSOR_OPTICALFLOW_MT      0x1F02

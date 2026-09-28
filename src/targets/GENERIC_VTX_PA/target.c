@@ -29,13 +29,15 @@
 #include "vtx_power_levels.h"
 
 const vtx_power_level_t g_vtx_power_level_defaults[] = {
-    { 25,  RTC6705_PA_7dBm,  true,  {800,800,800,800,800,800,800,0,0},         {0,0,0,0,0,0,0,0,0} },
-    { 100, RTC6705_PA_11dBm, true,  {1400,1400,1400,1400,1400,1400,1400,1400,1400}, {0,0,0,0,0,0,0,0,0} },
-    { 200, RTC6705_PA_13dBm, true,  {1800,1800,1800,1800,1800,1800,1800,1800,1800}, {0,0,0,0,0,0,0,0,0} },
-    { 800, RTC6705_PA_13dBm, true,  {2400,2400,2400,2400,2400,2400,2400,2400,2400}, {0,0,0,0,0,0,0,0,0} },
+    {25, RTC6705_PA_7dBm, true, {800, 800, 800, 800, 800, 800, 800, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {100, RTC6705_PA_11dBm, true, {1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400}, {0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {200, RTC6705_PA_13dBm, true, {1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800, 1800}, {0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    {800, RTC6705_PA_13dBm, true, {2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400}, {0, 0, 0, 0, 0, 0, 0, 0, 0}},
 };
 
-const uint8_t g_vtx_power_level_default_count = sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
+const uint8_t g_vtx_power_level_default_count =
+    sizeof(g_vtx_power_level_defaults) / sizeof(g_vtx_power_level_defaults[0]);
 
-const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658,5695,5760,5800,5840,5905,5945};
-const uint8_t g_vtx_cal_freq_default_count = sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);
+const uint16_t g_vtx_cal_freq_defaults_mhz[] = {5658, 5695, 5760, 5800, 5840, 5905, 5945};
+const uint8_t g_vtx_cal_freq_default_count =
+    sizeof(g_vtx_cal_freq_defaults_mhz) / sizeof(g_vtx_cal_freq_defaults_mhz[0]);

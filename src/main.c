@@ -29,7 +29,7 @@
 #include "video_graphics.h"
 #endif
 
-#define LED_BLINK_INTERVAL  100   // milliseconds
+#define LED_BLINK_INTERVAL  2000   // milliseconds
 #define DEBUG_LOOP_INTERVAL 1000  // milliseconds
 #define LOGO_TIMEOUT_MS     4000  // 4 seconds
 

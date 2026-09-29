@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 3.22)
 set(BUILD_VARIANT "" CACHE STRING "Build variant: NO_OSC, BLINKY, MCO, PA_DEBUG, SWO, HD, GRAPHICS, COLOR (combine with +)")
 
 set(TARGET_MCU "" CACHE STRING "Target MCU (e.g., STM32G431, STM32G474)")
+option(UART_BOOTLOADER "Build application for the OpenPixelOSD G431 UART bootloader" OFF)
 # set default to G431 if not specified
 if(NOT TARGET_MCU)
     set(TARGET_MCU STM32G431)
@@ -246,7 +247,17 @@ add_compile_definitions(
         USE_FULL_LL_DRIVER
         USE_HAL_DRIVER
 )
+if(UART_BOOTLOADER)
+    if(NOT TARGET_MCU STREQUAL "STM32G431" OR BUILD_VARIANT MATCHES "BLINKY")
+        message(FATAL_ERROR "UART_BOOTLOADER requires the STM32G431 OSD application")
+    endif()
+    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE USE_UART_BOOTLOADER)
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/bootloader/protocol.c src/bootloader/enter.c)
+    target_link_options(${CMAKE_PROJECT_NAME} PRIVATE "-Wl,--defsym=__app_offset=0x2000")
+    set(BUILD_NAME "${BUILD_NAME}_UART")
+endif()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${LINKER_SCRIPT}")
+set_property(TARGET ${CMAKE_PROJECT_NAME} APPEND PROPERTY LINK_DEPENDS ${LINKER_SCRIPT})
 
 add_subdirectory(cmake/stm32)
 
@@ -340,5 +351,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 
 # Flash the device using dfu-util
-add_custom_target(flash
-        COMMAND dfu-util -a 0 -s 0x08000000:leave -D ${PROJECT_BINARY_DIR}/${BIN_FILE} -R )
+if(NOT UART_BOOTLOADER)
+    add_custom_target(flash
+            COMMAND dfu-util -a 0 -s 0x08000000:leave -D ${PROJECT_BINARY_DIR}/${BIN_FILE} -R )
+endif()

@@ -8,6 +8,9 @@
 #include "msp_fc.h"
 #include "uart.h"
 #include "usb.h"
+#if defined(USE_UART_BOOTLOADER)
+#include "bootloader/protocol.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -384,6 +387,9 @@ EXEC_RAM void msp_loop_process(void)
 {
     uint8_t byte;
     while(uart1_rx_ring_get(&byte)) {
+#if defined(USE_UART_BOOTLOADER)
+        opg4_enter_byte(byte);
+#endif
         msp_process_received_data(&msp_uart, byte);
     }
     while(usb_uart_read_byte(&byte)) {

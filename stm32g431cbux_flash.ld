@@ -60,12 +60,13 @@ _Min_Stack_Size = 0x1000; /* required amount of stack */
 
 __eeprom_size = 0x1000;
 __msp_font_size = 0x4000;     /* 16K */
+__application_offset = DEFINED(__app_offset) ? __app_offset : 0;
 
 /* Specify the memory areas */
 MEMORY
 {
   RAM (xrw)         : ORIGIN = 0x20000000, LENGTH = 22K
-  FLASH (rx)        : ORIGIN = 0x08000000, LENGTH = 0x20000 - __eeprom_size - __msp_font_size - 0x2000  /* 112K - 8K -4K = 100K */
+  FLASH (rx)        : ORIGIN = 0x08000000 + __application_offset, LENGTH = 0x20000 - __eeprom_size - __msp_font_size - 0x2000 - __application_offset
   FLASH_LOGO (rx)   : ORIGIN = 0x08000000 + (0x20000 - __eeprom_size - __msp_font_size - 0x2000), LENGTH = 0x2000  /* 8K */
   FLASH_FONT (rx)   : ORIGIN = 0x08000000 + (0x20000 - __eeprom_size - __msp_font_size ), LENGTH = __msp_font_size
   FLASH_EEPROM (rx) : ORIGIN = 0x08000000 + (0x20000 - __eeprom_size), LENGTH = __eeprom_size  /* 4K */
